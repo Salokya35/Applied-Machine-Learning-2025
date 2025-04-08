@@ -1,0 +1,24 @@
+!/bin/bash
+
+# Get the current branch name
+BRANCH=$(git symbolic-ref --short HEAD)
+
+# Only run the tests if committing to the main branch
+if [ "$BRANCH" = "main" ]; then
+    echo "Running Docker tests before committing to main branch..."
+    
+    # Run the Docker test with coverage
+    python -m pytest test.py -v --cov=test.py --cov-report=term > coverage.txt
+    
+    # If the tests fail, prevent the commit
+    if [ $? -ne 0 ]; then
+        echo "Tests failed! Commit aborted."
+        exit 1
+    fi
+    
+    # Add the coverage report to the commit
+    git add coverage.txt
+fi
+
+# If everything passes, allow the commit
+exit 0
